@@ -1,0 +1,12 @@
+{"database1":{
+    "host_name": "47.104.102.28",
+    "user_name": "pd",
+    "user_password": "nankai306",
+    "db_name": "daily_db"
+  },
+  "database":{
+    "host_name": "47.104.102.28",
+    "user_name": "admin",
+    "user_password": "nankai306",
+    "db_name": "pd_db"
+  }}
