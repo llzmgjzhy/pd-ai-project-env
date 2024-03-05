@@ -40,7 +40,7 @@ def get_args_parser():
     return parser
 
 
-def pred(args, model, tst_dataset, filename, stanam, id):
+def pred(args, model, tst_dataset, filename, staname):
     # 创建tst_loader
     tst_loader = DataLoader(tst_dataset, batch_size=1, shuffle=False)
     # 导入模型参数
@@ -64,68 +64,82 @@ def pred(args, model, tst_dataset, filename, stanam, id):
         print(
             "当前放电类型：{}, 当前放电概率：{}".format(predicted.item(), prob.item())
         )
-        # save the prediction result to the database
-        save_pred_result(prob, predicted, filename, stanam, args.map_type_code, id)
+    # save the prediction result to the database
+    save_pred_result(prob, predicted, filename, staname, args.map_type_code, args.mode)
 
 
 def main(args):
 
+    # prpd data
+
     # get data_list that newly inserted into the database,if there is no new data, the program will stop
-    info_list, latest_id = read_us_prpd_info()
-    if info_list is None:
+    info_list_prpd = read_us_data_info()
+    info_list_prps = read_us_data_info(table_name="us_waveform_prps_info_bak")
+    info_list = pd.merge(
+        info_list_prpd, info_list_prps, on=["FILE_NAME", "STATION_NAME"], how="inner"
+    )
+
+    if len(info_list) == 0:
         print("This iteration has no new data.Please wait for the next iteration.")
         return None
 
     # model preparation
-    if args.map_type_code == "0x35":
-        model = CustomNet(80, 60)
-    elif args.map_type_code == "0x36":
-        model = CustomNet(50, 60)
-    model.to(device)
+    model_prpd_s = CustomNet(80, 60)
+    model_prpd_s.to(device)
+    model_prps_s = CustomNet(50, 60)
+    model_prps_s.to(device)
+
+    model_prpd_w = CustomWinNet(80, 60)
+    model_prpd_w.to(device)
+    model_prps_w = CustomWinNet(50, 60)
+    model_prps_w.to(device)
 
     # for loop,every item in the data_list will be used to predict,and the result will be saved to the database and the last_id will be updated
     for i in range(len(info_list)):
-        id = info_list["id"][i]
         filename = info_list["FILE_NAME"][i]
         staname = info_list["STATION_NAME"][i]
-        test_dataset = Dataset_load_tst(args.map_type_code, filename, staname)
+
+        filenames = get_filenames(info_list["FILE_NAME"], i)
+
+        # prpd data
+        args.map_type_code = "0x35"
+        prpd_dataset_s = Dataset_load_tst(args.map_type_code, filename, staname)
+        if len(filenames) != 0:
+            prpd_dataset_w = Dataset_load_window_tst(
+                args.map_type_code, filenames, staname
+            )
+
+        # prps data
+        args.map_type_code = "0x36"
+        prps_dataset_s = Dataset_load_tst(args.map_type_code, filename, staname)
+        if len(filenames) != 0:
+            prps_dataset_w = Dataset_load_window_tst(
+                args.map_type_code, filenames, staname
+            )
+
+        # prediction
+        # the pred func will predict the result and save the result to the database,and every operation will update the file name and station number
+
+        # single data
         args.mode = "s"
         print("单图谱预测")
-        # the pred func will predict the result and save the result to the database,and every operation will update the last_id
-        pred(args, model, test_dataset, filename, staname, id)
+        args.map_type_code = "0x35"
+        pred(args, model_prpd_s, prpd_dataset_s, filename, staname)
+        args.map_type_code = "0x36"
+        pred(args, model_prps_s, prps_dataset_s, filename, staname)
 
-    # TODO now we just test prpd data,we will add prps data later
-
-    # if args.map_type_code == "0x35":
-    #     # 构建网络模型
-    #     model = CustomNet(80, 60)
-    # elif args.map_type_code == "0x36":
-    #     model = CustomNet(50, 60)
-    # model.to(device)
-    # test_dataset = Dataset_load_tst(args.map_type_code, filename, staname)
-    # args.mode = "s" # 单图谱
-    # print("单图谱预测")
-    # # 预测
-    # pred(args, model, test_dataset)
-
-    # filename = ['AA_20240226225000000.dat', 'AA_20240226225500000.dat','AA_20240226230000000.dat']
-    # # 构造窗口数据集模型
-    # if args.map_type_code == "0x35":
-    #     # 构建网络模型
-    #     model = CustomWinNet(80, 60)
-    # elif args.map_type_code == "0x36":
-    #     model = CustomWinNet(50, 60)
-    #     # test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
-
-    # model.to(device)
-    # # 读取实际运行数据
-    # test_dataset = Dataset_load_window_tst(args.map_type_code, filename, staname)
-    # args.mode = "w"  # 窗口图谱
-    # print("窗口图谱预测")
-    # pred(args, model, test_dataset)
+        # window data
+        args.mode = "w"
+        print("窗口图谱预测")
+        if len(filenames) !=0:
+            args.map_type_code = "0x35"
+            pred(args, model_prpd_w, prpd_dataset_w, filename, staname)
+            args.map_type_code = "0x36"
+            pred(args, model_prps_w, prps_dataset_w, filename, staname)
+        else:
+            print('新文件不足三个，无法进行窗口图谱预测')
 
 
 if __name__ == "__main__":
     args = get_args_parser().parse_args()
-    args.map_type_code = "0x35"
     main(args)

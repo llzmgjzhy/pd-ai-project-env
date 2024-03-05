@@ -1,0 +1,2 @@
+file_name:AA_20240304110000000.dat
+station_number:2

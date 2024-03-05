@@ -1,7 +1,8 @@
 import time
 
 import datetime
+import numpy as np
+from utils import *
 
-timestamp_with_ms = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]
-data = 3
-print(f"yuc(%d)",(data))
+file_name,staname = get_last_file()
+print(file_name,staname)
