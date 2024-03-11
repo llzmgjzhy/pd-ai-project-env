@@ -39,7 +39,7 @@ class Dataset_load_tst(Dataset):
         # filename = info_list["FILE_NAME"][5000]
         # staname = info_list["STATION_NAME"][5000]
         # 表名
-        table_name = "us_waveform_prpd_sampledata_bak2"
+        table_name = "us_waveform_prpd_sampledata"
         # 列名
         col_names = ["id", "FILE_NAME", "STATION_NAME"]
         # 列名还有coll_1到coll_60
@@ -142,7 +142,7 @@ class Dataset_load_window_tst(Dataset):
         # filename = info_list["FILE_NAME"][5000]
         # staname = info_list["STATION_NAME"][5000]
         # 表名
-        table_name = "us_waveform_prpd_sampledata_bak2"
+        table_name = "us_waveform_prpd_sampledata"
         # 列名
         col_names = ["id", "FILE_NAME", "STATION_NAME"]
         # 列名还有coll_1到coll_60

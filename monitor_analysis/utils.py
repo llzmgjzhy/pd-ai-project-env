@@ -35,7 +35,7 @@ def save_last_file(filename, staname):
             file.write(f"file_name:{filename}\nstation_number:{station_number}")
             return "Last id saved to file."
     except IOError:
-        print("Error: Unable to save last id to file.")
+        print("Error: Unable to save last file info into file.")
 
 
 def read_us_data_info(table_name="us_waveform_prpd_info_bak"):
@@ -49,8 +49,11 @@ def read_us_data_info(table_name="us_waveform_prpd_info_bak"):
     with DatabaseConnection() as connection:
         cursor = connection.cursor()
         if connection.is_connected():
+            # cursor.execute(
+            #     f"SELECT {', '.join(col_names)} FROM {table_name} WHERE CAST(SUBSTRING(FILE_NAME, LOCATE('AA_', FILE_NAME) + LENGTH('AA_'), LOCATE('.dat', FILE_NAME) - LOCATE('AA_', FILE_NAME) - LENGTH('AA_')) AS UNSIGNED) > {filename} OR CAST(SUBSTRING(FILE_NAME, LOCATE('AA_', FILE_NAME) + LENGTH('AA_'), LOCATE('.dat', FILE_NAME) - LOCATE('AA_', FILE_NAME) - LENGTH('AA_')) AS UNSIGNED) = {filename} AND CAST(SUBSTRING(STATION_NAME, LOCATE('测试',STATION_NAME)+CHAR_LENGTH('测试'),LOCATE('#',STATION_NAME)-LOCATE('测试',STATION_NAME)-CHAR_LENGTH('测试')) AS UNSIGNED) > {staname}"
+            # )
             cursor.execute(
-                f"SELECT {', '.join(col_names)} FROM {table_name} WHERE CAST(SUBSTRING(FILE_NAME, LOCATE('AA_', FILE_NAME) + LENGTH('AA_'), LOCATE('.dat', FILE_NAME) - LOCATE('AA_', FILE_NAME) - LENGTH('AA_')) AS UNSIGNED) > {filename} OR CAST(SUBSTRING(FILE_NAME, LOCATE('AA_', FILE_NAME) + LENGTH('AA_'), LOCATE('.dat', FILE_NAME) - LOCATE('AA_', FILE_NAME) - LENGTH('AA_')) AS UNSIGNED) = {filename} AND CAST(SUBSTRING(STATION_NAME, LOCATE('测试',STATION_NAME)+CHAR_LENGTH('测试'),LOCATE('#',STATION_NAME)-LOCATE('测试',STATION_NAME)-CHAR_LENGTH('测试')) AS UNSIGNED) > {staname}"
+                f"SELECT {', '.join(col_names)} FROM {table_name} WHERE CAST(SUBSTRING(FILE_NAME, LOCATE('AA_', FILE_NAME) + LENGTH('AA_'), LOCATE('.dat', FILE_NAME) - LOCATE('AA_', FILE_NAME) - LENGTH('AA_')) AS UNSIGNED) > {filename} OR CAST(SUBSTRING(FILE_NAME, LOCATE('AA_', FILE_NAME) + LENGTH('AA_'), LOCATE('.dat', FILE_NAME) - LOCATE('AA_', FILE_NAME) - LENGTH('AA_')) AS UNSIGNED) = {filename} AND CAST(SUBSTRING(STATION_NAME, 1 ,LOCATE('开关柜',STATION_NAME)-1) AS UNSIGNED) > {staname}"
             )
             data = cursor.fetchall()
             if data:

@@ -5,7 +5,7 @@ import json
 class DatabaseConnection:
     def __init__(self):
         # 打开文件并加载JSON数据
-        with open("D://Graduate/projects/partial_discharge_monitoring_20230904/AI-project-envs/DataBase.json", "r") as file:
+        with open("E://Graduate/projects/partial_discharge/pd-ai-project-env/DataBase.json", "r") as file:
             db_config = json.load(file)["database"]
         self.host_name = db_config["host_name"]
         self.db_name = db_config["db_name"]

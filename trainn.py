@@ -86,7 +86,7 @@ def main(args):
     elif args.map_type_code == "0x36":
         model = CustomNet(50, 60)
 
-    # 读取数据
+    # # 读取数据
     trn_dataset = Dataset_load_trn(map_type_code=args.map_type_code, train=True)
     print("开始训练单时刻模型，图谱类型：{}".format(args.map_type_code))
     args.mode = "s"  # 单图谱
