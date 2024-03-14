@@ -1,2 +1,2 @@
-file_name:AA_20240307104000000.dat
-station_number:614
+file_name:AA_20240307140000000.dat
+station_number:620

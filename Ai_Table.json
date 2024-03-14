@@ -1,0 +1,58 @@
+{
+    "Ai_model_evaluation": {
+        "datetime": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "Sensor_version": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "Ai_model_version": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "data_size": {
+            "type": "BIGINT",
+            "b_length": 8
+        },
+        "model_accuracy": {
+            "type": "FLOAT",
+            "b_length": 4
+        }
+    },
+    "Ai_alarm_results": {
+        "file_name": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "device_name": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "station_name": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "model_name": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "model_version": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "alarm_result": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "pd_type": {
+            "type": "VARCHAR",
+            "b_length": 32
+        },
+        "operation_time":{
+            "type":"BIGINT",
+            "b_length":17
+        }
+    }
+}

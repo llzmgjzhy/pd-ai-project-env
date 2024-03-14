@@ -51,7 +51,7 @@ class Dataset_load_tst(Dataset):
             sta_name = staname
 
             # 构建查询语句
-            query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file_name}'"  # AND SUBSTR(STATION_NAME, 1, 4) = '{sta_name}'"
+            query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file_name}' AND STATION_NAME = '{sta_name}'"  #\ AND SUBSTR(STATION_NAME, 1, 4) = '{sta_name}'"
             # 执行查询
             cursor.execute(query)
 
@@ -59,7 +59,7 @@ class Dataset_load_tst(Dataset):
             newdata = cursor.fetchall()
             # 将datas转成ndarray
             newdata = np.array(newdata)
-            newdata = newdata[:80, 3:].astype(np.float32)
+            newdata = newdata[:, 3:].astype(np.float32)
             # 计算newdata总值
             pulse_count = np.sum(np.sum(newdata, axis=0))
             newdata = np.expand_dims(newdata, axis=0)  # 脉冲数量
@@ -72,7 +72,7 @@ class Dataset_load_tst(Dataset):
         # filename = info_list["FILE_NAME"][5000]
         # staname = info_list["STATION_NAME"][5000]
         # 表名
-        table_name = "us_waveform_prps_sampledata_bak2"
+        table_name = "us_waveform_prps_sampledata"
         # 列名
         col_names = ["id", "FILE_NAME", "STATION_NAME"]
         # 列名还有coll_1到coll_60
@@ -84,7 +84,7 @@ class Dataset_load_tst(Dataset):
             sta_name = staname
 
             # 构建查询语句
-            query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file_name}'"  # AND SUBSTR(STATION_NAME, 1, 4) = '{sta_name}'"
+            query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file_name}' AND STATION_NAME = '{sta_name}'"  # AND SUBSTR(STATION_NAME, 1, 4) = '{sta_name}'"
             # 执行查询
             cursor.execute(query)
 
@@ -92,7 +92,7 @@ class Dataset_load_tst(Dataset):
             newdata = cursor.fetchall()
             # 将datas转成ndarray
             newdata = np.array(newdata)
-            newdata = newdata[:50, 3:].astype(np.float32)
+            newdata = newdata[:, 3:].astype(np.float32)
             # 计算newdata总值
             pulse_count = np.sum(np.sum(newdata, axis=0))
             newdata = np.expand_dims(newdata, axis=0)  # 脉冲数量
@@ -154,7 +154,7 @@ class Dataset_load_window_tst(Dataset):
             # 构建查询语句
             window_data = []
             for file in file_name:
-                query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file}'"
+                query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file}' AND STATION_NAME = '{sta_name}'"
                 # 执行查询
                 cursor.execute(query)
 
@@ -162,7 +162,7 @@ class Dataset_load_window_tst(Dataset):
                 newdata = cursor.fetchall()
                 # 将datas转成ndarray
                 newdata = np.array(newdata)
-                newdata = newdata[:80, 3:].astype(np.float32)
+                newdata = newdata[:, 3:].astype(np.float32)
                 # Windows数据
                 window_data.append(newdata)
             # window_data
@@ -179,7 +179,7 @@ class Dataset_load_window_tst(Dataset):
         # filename = info_list["FILE_NAME"][5000]
         # staname = info_list["STATION_NAME"][5000]
         # 表名
-        table_name = "us_waveform_prps_sampledata_bak2"
+        table_name = "us_waveform_prps_sampledata"
         # 列名
         col_names = ["id", "FILE_NAME", "STATION_NAME"]
         # 列名还有coll_1到coll_60
@@ -193,7 +193,7 @@ class Dataset_load_window_tst(Dataset):
             # 构建查询语句
             window_data = []
             for file in file_name:
-                query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file}'"
+                query = f"SELECT {', '.join(col_names)} FROM {table_name} WHERE FILE_NAME = '{file}' AND STATION_NAME = '{sta_name}'"
                 # 执行查询
                 cursor.execute(query)
 
@@ -201,7 +201,7 @@ class Dataset_load_window_tst(Dataset):
                 newdata = cursor.fetchall()
                 # 将datas转成ndarray
                 newdata = np.array(newdata)
-                newdata = newdata[:50, 3:].astype(np.float32)
+                newdata = newdata[:, 3:].astype(np.float32)
                 # Windows数据
                 window_data.append(newdata)
             # window_data
