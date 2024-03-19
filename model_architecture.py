@@ -83,20 +83,28 @@ class VoltageNet(nn.Module):
 
 
 class VoltageWinNet(nn.Module):
-    def __init__(self, input_dim=4, output_dim=1):
+    def __init__(self, input_dim=4, output_dim=1, hidden_dim1=8, hidden_dim2=4):
         super(VoltageWinNet, self).__init__()
-        # 定义输入层到隐藏层的全连接层
-        self.fc1 = nn.Linear(input_dim, 8)  # 输入特征input_dim，隐藏层神经元8
-        # 定义隐藏层到输出层的全连接层
-        self.fc2 = nn.Linear(8, output_dim)  # 隐藏层神经元8，输出标签output_dim
+        # 第一层：输入层到隐藏层1
+        self.fc1 = nn.Linear(input_dim, hidden_dim1)
+        # 第二层：隐藏层1到隐藏层2
+        self.fc2 = nn.Linear(hidden_dim1, hidden_dim2)
+        # 第三层：隐藏层2到输出层
+        self.fc3 = nn.Linear(hidden_dim2, output_dim)
 
     def forward(self, x):
         # 前向传播
-        # x = x.unsqueeze(0)
         batch_size, window_size, input_dim = x.shape
-        x = x.view(-1, input_dim)  # 将输入数据展平成Batch维度的向量
-        x = torch.relu(self.fc1(x))  # 使用ReLU激活函数作为隐藏层的激活函数
-        x = torch.sigmoid(self.fc2(x))  # 使用Sigmoid激活函数作为输出层的激活函数，将输出限制在0到1之间
-        x = x.view(batch_size, window_size, -1)  # 将输出数据恢复成原始维度
-        x = torch.mean(x, dim=1)  # 在window维度上取平均，得到维度为[batch_size, output_dim]的输出
-        return x.view(-1)
+        # 合并batch_size和window_size，以适应全连接层
+        x = x.view(batch_size * window_size, input_dim)
+
+        # 通过第一层
+        x = torch.relu(self.fc1(x))
+        # 通过第二层
+        x = torch.relu(self.fc2(x))
+        # 通过第三层
+        x = torch.sigmoid(self.fc3(x))
+        # 恢复原始维度[batch_size, window_size, output_dim]
+        x = x.view(batch_size, window_size, -1)
+        # 在window_size维度上取平均，输出维度为[batch_size, output_dim]
+        return torch.mean(x, dim=1).view(-1)
