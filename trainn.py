@@ -42,7 +42,7 @@ def train(args, model, trn_dataset):
     # 优化器
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     # 损失函数
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
     # 训练模型
     model.to(device)
     for epoch in range(args.epochs):
@@ -50,7 +50,8 @@ def train(args, model, trn_dataset):
         step = 0
         n_minibatch = math.ceil(len(trn_dataset) / args.batch_size)
         for i, (inputs, labels) in enumerate(trn_loader):
-            inputs, labels = inputs.to(device), labels.to(device)
+            # labels = labels.long()
+            inputs, labels = inputs.to(device).to(torch.float32), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
             # outputs = outputs.squeeze()
@@ -106,7 +107,7 @@ def test(args, model, test_data, test_labels):
     print(f'Test Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}')
 
 def main(args):
-    # 构建网络模型
+    # # 构建网络模型
     if args.map_type_code == "0x35":
         model = CustomNet(80, 60)
     elif args.map_type_code == "0x36":
@@ -121,7 +122,7 @@ def main(args):
     # 训练模型
     train(args, model, trn_dataset)
 
-    # 构建窗口数据集模型
+    # # 构建窗口数据集模型
     if args.map_type_code == "0x35":
         model = CustomWinNet(80, 60)
     elif args.map_type_code == "0x36":
@@ -139,5 +140,5 @@ def main(args):
 
 if __name__ == "__main__":
     args = get_args_parser().parse_args()
-    args.map_type_code = "0x35"
+    args.map_type_code = "0x31"
     main(args)

@@ -12,6 +12,9 @@ from model_architecture import CustomNet, CustomWinNet
 from torch.utils.data import DataLoader
 from utils import *
 import re
+from pathlib import Path
+
+cur_dir = Path(__file__).resolve().parent.parent
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 import math
@@ -36,7 +39,7 @@ def get_args_parser():
     parser.add_argument(
         "--model_save_path",
         type=str,
-        default="E://Graduate/projects/partial_discharge/pd-ai-project-env/saved_models/",
+        default=f"{cur_dir}/saved_models/",
     )
     return parser
 
@@ -67,9 +70,7 @@ def pred(args, model, tst_dataset, filename, staname):
             # predictions.extend(predicted.cpu().numpy().tolist())
         # 打印概率与预测结果
         print("图谱类型：{}".format(args.map_type_code))
-        print(
-            "当前放电类型：{}, 当前放电概率：{}".format(predicted, prob)
-        )
+        print("当前放电类型：{}, 当前放电概率：{}".format(predicted, prob))
     # save the prediction result to the database
     save_pred_result(prob, predicted, filename, staname, args.map_type_code, args.mode)
 
@@ -142,13 +143,13 @@ def main(args):
         # window data
         args.mode = "w"
         print("窗口图谱预测")
-        if len(filenames) !=0:
+        if len(filenames) != 0:
             args.map_type_code = "0x35"
             pred(args, model_prpd_w, prpd_dataset_w, filename, staname)
             args.map_type_code = "0x36"
             pred(args, model_prps_w, prps_dataset_w, filename, staname)
         else:
-            print('新文件不足三个，无法进行窗口图谱预测')
+            print("新文件不足三个，无法进行窗口图谱预测")
 
 
 if __name__ == "__main__":

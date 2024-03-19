@@ -7,13 +7,15 @@ import numpy as np
 import pandas as pd
 import argparse
 import torch
-from Data_loader_trn import Dataset_load_trn, Dataset_load_window_trn
+from Data_loader_tst import Dataset_load_tst, Dataset_load_window_tst
 from model_architecture import VoltageWinNet, VoltageNet
 from torch.utils.data import DataLoader
 from utils import *
 import re
 import os
+from pathlib import Path
 
+cur_dir = Path(__file__).resolve().parent.parent
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 import math
 
@@ -37,7 +39,7 @@ def get_args_parser():
     parser.add_argument(
         "--model_save_path",
         type=str,
-        default="E://Graduate/projects/partial_discharge/pd-ai-project-env/saved_models/",
+        default=f"{cur_dir}/saved_models/",
     )
     return parser
 
@@ -72,9 +74,10 @@ def pred(args, model, tst_dataset, filename, staname):
     save_pred_result(prob, predicted, filename, staname, args.map_type_code, args.mode)
 
 
-def test(args, model, test_data, filename,pos_name, pos_code):
+def test(args, model, test_data, filename, pos_name, pos_code,id = 0):
     # 设置模型为评估模式
-    test_data = torch.tensor(test_data).to(device)
+    input = torch.tensor(test_data).to(device)
+    model = model.to(device)
 
     model.eval()
     # test_labels = torch.tensor(test_labels).to(device)
@@ -82,17 +85,14 @@ def test(args, model, test_data, filename,pos_name, pos_code):
     # 使用无梯度计算上下文管理器
     with torch.no_grad():
         # 将测试数据输入模型进行预测
-        inputs = test_data.to(torch.float32)
+        inputs = input.to(torch.float32)
+        # inputs = test_data
         outputs = model(inputs)
         # 计算准确率
         predicted_labels = torch.round(outputs)
         prob = torch.sigmoid(outputs)
         print("图谱类型：{}".format(args.map_type_code))
-        print(
-            "当前放电类型：{}, 当前放电概率：{}".format(
-                predicted_labels, prob
-            )
-        )
+        print("当前放电类型：{}, 当前放电概率：{}".format(predicted_labels, prob))
 
     # 打印测试结果
     save_pred_result_voltage(
@@ -103,6 +103,7 @@ def test(args, model, test_data, filename,pos_name, pos_code):
         pos_code,
         args.map_type_code,
         args.mode,
+        id
     )
 
 
@@ -130,24 +131,39 @@ def main(args):
         )
     )
 
+    filename, staname, id = get_last_file_wireless()
+
     # 单窗口数据集
-    dataset_s = Dataset_load_trn(map_type_code=args.map_type_code, train=True)
+    dataset_s = Dataset_load_tst(
+        map_type_code=args.map_type_code, filename=filename, staname=staname, id=id
+    )
     file_info_s = dataset_s.file_info
-    X_test_s = dataset_s.trn
+    X_test_s = dataset_s.tst
 
     # 多窗口数据集
-    dataset_w = Dataset_load_trn(map_type_code=args.map_type_code, train=True)
+    dataset_w = Dataset_load_window_tst(
+        map_type_code=args.map_type_code, filename=filename, staname=staname, id=id
+    )
     file_info_w = dataset_w.file_info
-    X_test_w = dataset_w.trn
+    X_test_w = dataset_w.tst
 
-    # test(args, model_s, X_test_s, file_info_s)
+    # args.mode = "s"
+    # for i in range(len(file_info_s)):
+    #     id = file_info_s[i][0]
+    #     filename = file_info_s[i][1]
+    #     pos_name = file_info_s[i][2]
+    #     pos_code = file_info_s[i][3]
 
-    for i in range(len(file_info_s)):
-        filename = file_info_s[i][0]
-        pos_name = file_info_s[i][1]
-        pos_code = file_info_s[i][0]
+    #     test(args, model_s, X_test_s[i], filename, pos_name, pos_code)
 
-        test(args, model_s, X_test_s[i], filename, pos_name, pos_code)
+    args.mode = "w"
+    for i in range(len(file_info_w)):
+        id = file_info_w[i][0]
+        filename = file_info_w[i][1]
+        pos_name = file_info_w[i][2]
+        pos_code = file_info_w[i][3]
+
+        test(args, model_w, X_test_w[i], filename, pos_name, pos_code,id)
 
 
 if __name__ == "__main__":

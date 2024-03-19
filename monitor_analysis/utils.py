@@ -7,6 +7,9 @@ import pandas as pd
 import datetime
 import re
 import datetime
+from pathlib import Path
+
+current_dir = Path(__file__).resolve().parent
 
 
 def get_last_file():
@@ -15,11 +18,27 @@ def get_last_file():
      the file contains the last file name and station name for locating last operation
     """
     try:
-        with open("E://Graduate/projects/partial_discharge/pd-ai-project-env/monitor_analysis/last_file.txt", "r") as file:
+        with open(f"{current_dir}/last_file.txt", "r") as file:
             content = file.read().strip().replace("\n", ",").split(",")
             filename = re.findall(r"\d+", content[0])[0]
             staname = re.findall(r"\d+", content[1])[0]
             return filename, staname
+    except FileNotFoundError:
+        return None
+
+
+def get_last_file_wireless():
+    """
+    acquire the last file name,station name and id from the last_file_wireless.txt file
+    return filename,staname,id
+    """
+    try:
+        with open(f"{current_dir}/last_file_wireless.txt", "r") as file:
+            content = file.read().strip().replace("\n", ",").split(",")
+            filename = re.findall(r"\d+", content[0])[0]
+            staname = re.findall(r"\d+", content[1])[0]
+            id = re.findall(r"\d+", content[2])[0]
+            return filename, staname, id
     except FileNotFoundError:
         return None
 
@@ -31,8 +50,21 @@ def save_last_file(filename, staname):
     """
     station_number = re.findall(r"\d+", staname)[0]
     try:
-        with open("last_file.txt", "w") as file:
+        with open(f"{current_dir}/last_file.txt", "w") as file:
             file.write(f"file_name:{filename}\nstation_number:{station_number}")
+            return "Last id saved to file."
+    except IOError:
+        print("Error: Unable to save last file info into file.")
+
+def save_last_wireless_file(filename, staname,id):
+    """
+    Save the last file name and station number to the last_id.txt file.
+    Before saving the id, the old id will be removed.
+    """
+    station_number = re.findall(r"\d+", staname)[0]
+    try:
+        with open(f"{current_dir}/last_file_wireless.txt", "w") as file:
+            file.write(f"file_name:{filename}\nstation_number:{station_number}\nid:{id}")
             return "Last id saved to file."
     except IOError:
         print("Error: Unable to save last file info into file.")
@@ -84,6 +116,7 @@ def get_filenames(info_list, index):
     filenames = [filename_prev, info_list[index], filename_next]
 
     return filenames
+
 
 def get_filenames_jump_one(info_list, index):
     """
@@ -141,9 +174,9 @@ def save_pred_result(prob, predicted, filename, staname, map_type_code, pred_mod
                 cursor.execute(
                     f"INSERT INTO {table_name} (file_name, station_name, pd_type_{map_type}_{pred_mode}, pd_prob_{map_type}_{pred_mode}, operation_time) VALUES ('{filename}', '{staname}', {predicted.item()}, {prob.item()}, '{operation_time}')"
                 )
-            
-            table_name = 'ai_alarm_results'
-            model_name = "pd_"+map_type_code+"_"+pred_mode
+
+            table_name = "ai_alarm_results"
+            model_name = "pd_" + map_type_code + "_" + pred_mode
             if predicted.item() == 1:
                 cursor.execute(
                     f"INSERT INTO {table_name} (file_name, device_name,station_name, model_name, model_version, alarm_result,pd_type,operation_time) VALUES ('{filename}', '开关柜', '{staname}','{model_name}', '0.1', '{prob.item()}','{predicted.item()}','{operation_time}')"
@@ -167,7 +200,9 @@ def save_pred_result(prob, predicted, filename, staname, map_type_code, pred_mod
     )
 
 
-def save_pred_result_voltage(prob, predicted, filename, pos_name,pos_code, map_type_code, pred_mode):
+def save_pred_result_voltage(
+    prob, predicted, filename, pos_name, pos_code, map_type_code, pred_mode,id = 0
+):
     """
     Save the prediction result to the database.
     """
@@ -198,7 +233,7 @@ def save_pred_result_voltage(prob, predicted, filename, pos_name,pos_code, map_t
 
             # Insert alarm data
             table_name = "ai_alarm_results"
-            model_name = "pd_"+map_type_code+"_"+pred_mode
+            model_name = "pd_" + map_type_code + "_" + pred_mode
 
             if predicted.item() == 1:
                 cursor.execute(
@@ -208,6 +243,8 @@ def save_pred_result_voltage(prob, predicted, filename, pos_name,pos_code, map_t
         cursor.close()
 
     # Save the latest file name and station name to the last_id.txt file.
+    if map_type_code == "0x31" and pred_mode == "w":
+        save_last_wireless_file(filename, pos_name,id)
     print(
         "文件",
         filename,
@@ -220,7 +257,8 @@ def save_pred_result_voltage(prob, predicted, filename, pos_name,pos_code, map_t
         "预测成功，预测结果已保存到数据库。",
     )
 
-def ai_evaluation_database(sensor_version,ai_model_version,data_size,model_accuracy):
+
+def ai_evaluation_database(sensor_version, ai_model_version, data_size, model_accuracy):
     table_name = "ai_model_evaluation"
     with DatabaseConnection() as connection:
         cursor = connection.cursor()
@@ -229,6 +267,6 @@ def ai_evaluation_database(sensor_version,ai_model_version,data_size,model_accur
             date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
 
             cursor.execute(
-                    f"INSERT INTO {table_name} (datetime, Sensor_version,Ai_model_version, data_size, model_accuracy) VALUES ('{date_time}', 'AE', '0.1','{data_size}', '0.7')"
-                )
+                f"INSERT INTO {table_name} (datetime, Sensor_version,Ai_model_version, data_size, model_accuracy) VALUES ('{date_time}', 'AE', '0.1','{data_size}', '0.7')"
+            )
             connection.commit()

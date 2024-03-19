@@ -61,7 +61,7 @@ class Dataset_load_trn(Dataset):
             "614开关柜",
             "615开关柜",
             "616开关柜",
-            " 620开关柜",
+            "620开关柜",
         ]
         y = [1, 1, 1, 0, 0, 0]
         # 620电缆仓上，620电缆仓下, 614开关柜, 615开关柜, 616开关柜, 620开关柜
@@ -90,6 +90,7 @@ class Dataset_load_trn(Dataset):
                 .iloc[:, [1, 8, 9]]
                 .values
             )
+
             # 制作标签
 
             if i == 0:
@@ -98,7 +99,9 @@ class Dataset_load_trn(Dataset):
                 label = np.ones((selected_data.shape[0], 1)) * y[i]
             else:
                 data = np.concatenate((data, selected_data), axis=0)
-                file_info_data = np.concatenate((file_info_data, selected_data_file), axis=0)
+                file_info_data = np.concatenate(
+                    (file_info_data, selected_data_file), axis=0
+                )
                 label = np.concatenate(
                     (label, np.ones((selected_data.shape[0], 1)) * y[i]), axis=0
                 )
@@ -304,7 +307,7 @@ class Dataset_load_window_trn(Dataset):
 
         # 转成DataFrame
         df = pd.DataFrame(rows, columns=col_names)
-        file_info = df[["FILE_NAME", "measure_position_name", "measure_position_code"]]
+        file_info = df[["file_name", "measure_position_name", "measure_position_code"]]
 
         # 初始化空列表用于存储窗口数据和标签
         window_data = []

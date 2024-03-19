@@ -1,11 +1,14 @@
 import mysql.connector
 from mysql.connector import Error
 import json
+from pathlib import Path
+
+current_dir = Path(__file__).resolve().parent
 
 class DatabaseConnection:
     def __init__(self):
         # 打开文件并加载JSON数据
-        with open("E://Graduate/projects/partial_discharge/pd-ai-project-env/DataBase.json", "r") as file:
+        with open(f"{current_dir}/DataBase.json", "r") as file:
             db_config = json.load(file)["database"]
         self.host_name = db_config["host_name"]
         self.db_name = db_config["db_name"]

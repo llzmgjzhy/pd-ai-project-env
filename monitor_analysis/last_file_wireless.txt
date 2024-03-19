@@ -1,0 +1,3 @@
+file_name:AA_20240318145000000.dat
+station_number:620
+id:24823
