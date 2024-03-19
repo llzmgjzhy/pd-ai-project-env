@@ -17,8 +17,8 @@ import math
 
 def get_args_parser():
     parser = argparse.ArgumentParser("Partial Discharge Model training", add_help=False)
-    parser.add_argument("--batch_size", default=4, type=int)
-    parser.add_argument("--epochs", default=10, type=int)
+    parser.add_argument("--batch_size", default=32, type=int)
+    parser.add_argument("--epochs", default=30, type=int)
     parser.add_argument("--detail_step", default=1, type=int)
     parser.add_argument("--map_type_code", default="0x35", type=str)  # 图谱类型编码
 
@@ -107,20 +107,20 @@ def test(args, model, test_data, test_labels):
     print(f'Test Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}')
 
 def main(args):
-    # # 构建网络模型
-    if args.map_type_code == "0x35":
-        model = CustomNet(80, 60)
-    elif args.map_type_code == "0x36":
-        model = CustomNet(50, 60)
-    elif args.map_type_code == "0x31":
-        model = VoltageNet(4, 1)
+    # # # 构建网络模型
+    # if args.map_type_code == "0x35":
+    #     model = CustomNet(80, 60)
+    # elif args.map_type_code == "0x36":
+    #     model = CustomNet(50, 60)
+    # elif args.map_type_code == "0x31":
+    #     model = VoltageNet(4, 1)
 
-    # # 读取数据
-    trn_dataset = Dataset_load_trn(map_type_code=args.map_type_code, train=True)
-    print("开始训练单时刻模型，图谱类型：{}".format(args.map_type_code))
-    args.mode = "s"  # 单图谱
-    # 训练模型
-    train(args, model, trn_dataset)
+    # # # 读取数据
+    # trn_dataset = Dataset_load_trn(map_type_code=args.map_type_code, train=True)
+    # print("开始训练单时刻模型，图谱类型：{}".format(args.map_type_code))
+    # args.mode = "s"  # 单图谱
+    # # 训练模型
+    # train(args, model, trn_dataset)
 
     # # 构建窗口数据集模型
     if args.map_type_code == "0x35":

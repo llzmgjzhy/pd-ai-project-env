@@ -338,9 +338,11 @@ class Dataset_load_window_trn(Dataset):
         # 归一化处理
         min_vol = -7
         max_vol = 73
+        max_f = 34
         window_data[:, :, 0] = (window_data[:, :, 0] - min_vol) / (max_vol - min_vol)
         window_data[:, :, 1] = (window_data[:, :, 1] - min_vol) / (max_vol - min_vol)
-
+        window_data[:, :, 2] = (window_data[:, :, 2] - min_vol) / (max_f - min_vol)
+        window_data[:, :, 3] = (window_data[:, :, 3] - min_vol) / (max_f - min_vol)
         return window_data, window_label, file_info
 
     def read_us_prpd_info(self):

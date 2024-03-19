@@ -86,7 +86,7 @@ class VoltageWinNet(nn.Module):
     def __init__(self, input_dim=4, output_dim=1):
         super(VoltageWinNet, self).__init__()
         # 定义输入层到隐藏层的全连接层
-        self.fc1 = nn.Linear(input_dim, 8)  # 输入特征input_dim，隐藏层神经元8
+        self.fc1 = nn.Linear(12, 8)  # 输入特征input_dim，隐藏层神经元8
         # 定义隐藏层到输出层的全连接层
         self.fc2 = nn.Linear(8, output_dim)  # 隐藏层神经元8，输出标签output_dim
 
@@ -94,9 +94,7 @@ class VoltageWinNet(nn.Module):
         # 前向传播
         # x = x.unsqueeze(0)
         batch_size, window_size, input_dim = x.shape
-        x = x.view(-1, input_dim)  # 将输入数据展平成Batch维度的向量
+        x = x.view(batch_size, -1)  # 将输入数据展平成Batch维度的向量
         x = torch.relu(self.fc1(x))  # 使用ReLU激活函数作为隐藏层的激活函数
         x = torch.sigmoid(self.fc2(x))  # 使用Sigmoid激活函数作为输出层的激活函数，将输出限制在0到1之间
-        x = x.view(batch_size, window_size, -1)  # 将输出数据恢复成原始维度
-        x = torch.mean(x, dim=1)  # 在window维度上取平均，得到维度为[batch_size, output_dim]的输出
-        return x.view(-1)
+        return x
