@@ -1,4 +1,4 @@
-from Mysql_connect import DatabaseConnection
+from mysql_db import DatabaseConnection
 import numpy as np
 import pandas as pd
 import pickle

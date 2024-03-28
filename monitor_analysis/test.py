@@ -5,7 +5,7 @@ import numpy as np
 # from utils import *
 import sys
 sys.path.append("..")
-from Mysql_connect import DatabaseConnection
+from mysql_db.Mysql_connect import DatabaseConnection
 import pandas as pd
 import os
 from pathlib import Path

@@ -1,9 +1,40 @@
-from Mysql_connect import DatabaseConnection
+from mysql_db import DatabaseConnection
 import numpy as np
 import pandas as pd
 import pickle
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
+from abc import ABC
+from abc import abstractmethod
+
+# base class,define the common method
+# including read_info and read_data,which are abstract method
+class Base_DataLoader_Tst(ABC):
+    def __init__(self,info_table_name,data_table_name) -> None:
+        self.info_table_name = info_table_name
+        self.data_table_name = data_table_name
+        self.tst = []
+
+    @abstractmethod
+    def read_info(self):
+        """
+        read the info data according to the info table
+        """
+        pass
+
+    @abstractmethod
+    def read_data(self):
+        """
+        read the data according to the data table
+        """
+        pass
+
+    def __getitem__(self, index):
+        features = self.tst[index]
+        return features
+
+    def __len__(self):
+        return len(self.tst)
 
 
 class Dataset_load_tst(Dataset):

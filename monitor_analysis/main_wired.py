@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import argparse
 import torch
-from Data_loader_tst import Dataset_load_tst, Dataset_load_window_tst
-from model_architecture import CustomNet, CustomWinNet
+from dataloader.Data_loader_tst import Dataset_load_tst, Dataset_load_window_tst
+from model.model_architecture import CustomNet, CustomWinNet
 from torch.utils.data import DataLoader
 from utils import *
 import re

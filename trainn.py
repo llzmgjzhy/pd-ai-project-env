@@ -5,8 +5,8 @@ import pandas as pd
 import argparse
 import torch
 import torch.nn as nn
-from Data_loader_trn import Dataset_load_trn, Dataset_load_window_trn
-from model_architecture import CustomNet, CustomWinNet, VoltageNet, VoltageWinNet
+from dataloader.Data_loader_trn import Dataset_load_trn, Dataset_load_window_trn
+from model.model_architecture import CustomNet, CustomWinNet, VoltageNet, VoltageWinNet
 from torch import optim
 from torch.utils.data import DataLoader
 from torchinfo import summary
@@ -109,34 +109,40 @@ def train(args, model, trn_dataset):
 
 def main(args):
     # # # 构建网络模型
-    # if args.map_type_code == "0x35":
-    #     model = CustomNet(80, 60)
-    # elif args.map_type_code == "0x36":
-    #     model = CustomNet(50, 60)
-    # elif args.map_type_code == "0x31":
-    #     model = VoltageNet(4, 1)
+    if args.map_type_code == "0x35":
+        model = CustomNet(80, 60)
+    elif args.map_type_code == "0x36":
+        model = CustomNet(50, 60)
+    elif args.map_type_code == "0x31":
+        model = VoltageNet(4, 1)
 
-    # # # 读取数据
-    # trn_dataset = Dataset_load_trn(map_type_code=args.map_type_code, train=True)
-    # print("开始训练单时刻模型，图谱类型：{}".format(args.map_type_code))
-    # args.mode = "s"  # 单图谱
-    # # 训练模型
-    # train(args, model, trn_dataset)
+    # import the module dynamically
+    # TODO:clarify code after equip folder code completion.including dataset_loader and model import
+    equip_module = importlib.import_module(f"equip.{args.equip_name}.data_loader")
+    Test_Loader = getattr(equip_module, "Dataloader_Trn")
+    trn_dataset = Test_Loader()
+
+    # # 读取数据
+    trn_dataset = Dataset_load_trn(map_type_code=args.map_type_code, train=True)
+    print("开始训练单时刻模型，图谱类型：{}".format(args.map_type_code))
+    args.mode = "s"  # 单图谱
+    # 训练模型
+    train(args, model, trn_dataset)
 
     # # 构建窗口数据集模型
-    if args.map_type_code == "0x35":
-        model = CustomWinNet(80, 60)
-    elif args.map_type_code == "0x36":
-        model = CustomWinNet(50, 60)
-    elif args.map_type_code == "0x31":
-        model = VoltageWinNet(4, 1, 8, 4)
+    # if args.map_type_code == "0x35":
+    #     model = CustomWinNet(80, 60)
+    # elif args.map_type_code == "0x36":
+    #     model = CustomWinNet(50, 60)
+    # elif args.map_type_code == "0x31":
+    #     model = VoltageWinNet(4, 1, 8, 4)
 
-    # 读取窗口数据集
-    trn_dataset = Dataset_load_window_trn(map_type_code=args.map_type_code, train=True)
-    print("开始训练窗口模型，图谱类型：{}".format(args.map_type_code))
-    args.mode = "w"  # 窗口
-    # 训练窗口数据集模型
-    train(args, model, trn_dataset)
+    # # 读取窗口数据集
+    # trn_dataset = Dataset_load_window_trn(map_type_code=args.map_type_code, train=True)
+    # print("开始训练窗口模型，图谱类型：{}".format(args.map_type_code))
+    # args.mode = "w"  # 窗口
+    # # 训练窗口数据集模型
+    # train(args, model, trn_dataset)
 
 
 if __name__ == "__main__":

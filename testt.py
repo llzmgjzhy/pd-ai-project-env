@@ -4,9 +4,10 @@ import numpy as np
 import pandas as pd
 import argparse
 import torch
-from Data_loader_tst import Dataset_load_tst, Dataset_load_window_tst
-from model_architecture import CustomNet, CustomWinNet
+from dataloader.Data_loader_tst import Dataset_load_tst, Dataset_load_window_tst
+from model.model_architecture import CustomNet, CustomWinNet
 from torch.utils.data import DataLoader
+import importlib
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 import math
@@ -63,7 +64,16 @@ def main(args):
     elif args.map_type_code == "0x36":
         model = CustomNet(50, 60)
     model.to(device)
+    
+    # import the module dynamically
+    # TODO:clarify code after equip folder code completion 
+    # including dataset_loader and model import
+    equip_module = importlib.import_module(f"equip.{args.equip_name}.data_loader")
+    Test_Loader = getattr(equip_module, "Dataloader_Tst")
+    test_dataset = Tst_Loader(filename, staname)
+
     test_dataset = Dataset_load_tst(args.map_type_code, filename, staname)
+
     args.mode = "s" # 单图谱
     print("单图谱预测")
     # 预测

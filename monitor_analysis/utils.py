@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("..")
-from Mysql_connect import DatabaseConnection
+from mysql_db.Mysql_connect import DatabaseConnection
 import numpy as np
 import pandas as pd
 import datetime

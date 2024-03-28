@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import argparse
 import torch
-from Data_loader_tst import Dataset_load_tst, Dataset_load_window_tst
-from model_architecture import VoltageWinNet, VoltageNet
+from dataloader.Data_loader_tst import Dataset_load_tst, Dataset_load_window_tst
+from model.model_architecture import VoltageWinNet, VoltageNet
 from torch.utils.data import DataLoader
 from utils import *
 import re
@@ -86,6 +86,7 @@ def test(args, model, test_data, filename, pos_name, pos_code,id = 0):
     with torch.no_grad():
         # 将测试数据输入模型进行预测
         inputs = input.to(torch.float32)
+        inputs.unsqueeze_(0)
         # inputs = test_data
         outputs = model(inputs)
         # 计算准确率
@@ -147,14 +148,14 @@ def main(args):
     file_info_w = dataset_w.file_info
     X_test_w = dataset_w.tst
 
-    args.mode = "s"
-    for i in range(len(file_info_s)):
-        id = file_info_s[i][0]
-        filename = file_info_s[i][1]
-        pos_name = file_info_s[i][2]
-        pos_code = file_info_s[i][3]
+    # args.mode = "s"
+    # for i in range(len(file_info_s)):
+    #     id = file_info_s[i][0]
+    #     filename = file_info_s[i][1]
+    #     pos_name = file_info_s[i][2]
+    #     pos_code = file_info_s[i][3]
 
-        test(args, model_s, X_test_s[i], filename, pos_name, pos_code)
+    #     test(args, model_s, X_test_s[i], filename, pos_name, pos_code)
 
     args.mode = "w"
     for i in range(len(file_info_w)):
